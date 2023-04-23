@@ -1,4 +1,8 @@
-﻿using System;
+﻿// this exception was required because of a mistake in the order of assignment of
+// the schema validation handler, not currently required.
+// #define ManageReadLoopException
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,7 +55,8 @@ public static partial class Audit
         /// </summary>
         NotFoundError = 1 << 2,
         /// <summary>
-        /// When auditing an IDS, ne or more errors encountered in the XML structure (includes XSD compliance errors).
+        /// When auditing an IDS, one or more errors were encountered in the XML structure (includes XSD compliance errors).
+        /// Depending on the <see cref="AuditProcessOptions.XmlWarningAction"/> property, this might include XSD schema warnings.
         /// </summary>
         IdsStructureError = 1 << 3,
         /// <summary>
@@ -61,11 +66,16 @@ public static partial class Audit
         /// <summary>
         /// A custom XSD was passed, but it could not be used because of an error in its content or structure.
         /// </summary>
-        XsdSchemaError = 1 << 5,
+        XsdSchemaError = 1 << 6,
         /// <summary>
         /// An unmanaged error occurred in the main audit methods. Please contact the authors to address the problem.
         /// </summary>
-        UnhandledError = 1 << 6,
+        UnhandledError = 1 << 7,
+        /// <summary>
+        /// When auditing an IDS, one or more warnings were encountered in the XML structure as defined by the XSD schemas.
+        /// Triggering this status is configurable using the <see cref="AuditProcessOptions.XmlWarningAction"/> property.
+        /// </summary>
+        IdsStructureWarning = 1 << 8,
     }
 
     /// <summary>
@@ -82,7 +92,7 @@ public static partial class Audit
         if (xsett is null)
             return Status.NotImplementedError;
         FinalizeSettings(xsett);
-        return AuditStreamAsync(idsSource, auditSettings, xsett, logger).Result;
+        return AuditStreamAsync(idsSource, auditSettings, xsett, logger).Result; // in  run(stream)
     }
 
     /// <summary>
@@ -212,7 +222,7 @@ public static partial class Audit
         var auditSettings = new AuditHelper(logger, opts);
 
         using var stream = File.OpenRead(theFile.FullName);
-        return await AuditStreamAsync(stream, auditSettings, rSettings, logger);
+        return await AuditStreamAsync(stream, auditSettings, rSettings, logger); // in AuditIdsComplianceAsync
     }
 
     private static void FinalizeSettings(XmlReaderSettings rSettings)
@@ -221,11 +231,15 @@ public static partial class Audit
         rSettings.Async = true;
         rSettings.IgnoreComments = true;
         rSettings.IgnoreWhitespace = true;
+        rSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
     }
 
     private static async Task<Status> AuditStreamAsync(Stream theStream, AuditHelper auditSettings, XmlReaderSettings rSettings, ILogger? logger)
     {
         Status contentStatus = Status.Ok;
+        // the handler needs to be set before creating the reader,
+        // otherwise the validation event is not registered
+        rSettings.ValidationEventHandler += new ValidationEventHandler(auditSettings.ValidationReporter);
         XmlReader reader;
         try
         {
@@ -239,21 +253,16 @@ public static partial class Audit
             logger?.LogCritical("{exceptionType}: {exceptionMessage}", ex.GetType().Name, ex.Message);
             return auditSettings.SchemaStatus | contentStatus | Status.XsdSchemaError;
         }
-#if false
-        int tot = 0;
-        foreach (XmlSchema item in rSettings.Schemas.Schemas())
-        {
-            tot += item.Elements.Names.Count;
-        }
-        logger?.LogDebug("XmlReaderSettings has {schemaCount} schemas and {tot} elements", rSettings.Schemas.Count, tot);
-#endif 
+
         var cntRead = 0;
         var elementsStack = new Stack<BaseContext>(); // we prepare the stack to evaluate the IDS content
         BaseContext? current = null;
-        rSettings.ValidationEventHandler += new ValidationEventHandler(auditSettings.ValidationReporter);
-
+        
+        
+#if ManageReadLoopException
         try
         {
+#endif
             while (await reader.ReadAsync()) // the loop reads the entire file to trigger validation events.
             {
                 cntRead++;
@@ -271,6 +280,19 @@ public static partial class Audit
                             if (elementsStack.TryPeek(out var peeked))
                                 parent = peeked;
 #endif
+                            if (reader.LocalName == "ids" && rSettings.Schemas.Count == 0)
+                            {
+                                var loc = reader.GetAttribute("schemaLocation", "http://www.w3.org/2001/XMLSchema-instance") ?? string.Empty;
+                                if (!string.IsNullOrEmpty(loc))
+                                {
+                                    var vrs = IdsFacts.GetVersionFromLocation(loc);
+                                    var schemas = GetSchemasByVersion(vrs, logger);
+                                    foreach (var schema in schemas)
+                                    {
+                                        rSettings.Schemas.Add(schema);
+                                    }
+                                }
+                            }
                             var newContext = IdsXmlHelpers.GetContextFromElement(reader, parent, logger); // this is always not null
 
                             // we only push on the stack if it's not empty, e.g.: <some /> does not go on the stack
@@ -297,10 +319,11 @@ public static partial class Audit
                     }
                 }
             }
+#if ManageReadLoopException
         }
         catch (XmlSchemaValidationException svex)
         {
-            logger?.LogError("{exceptionType}: {exceptionMessage}", svex.GetType().Name, svex.Message);
+            logger?.LogError("{exceptionType}: {exceptionMessage} Line {line}, pos {}.", svex.GetType().Name, svex.Message, svex.LineNumber, svex.LinePosition);
             return auditSettings.SchemaStatus | contentStatus | Status.IdsStructureError;
         }
         catch (Exception ex)
@@ -310,9 +333,12 @@ public static partial class Audit
         }
         finally
         {
+#endif
             reader.Dispose();
             rSettings.ValidationEventHandler -= new ValidationEventHandler(auditSettings.ValidationReporter);
+#if ManageReadLoopException
         }
+#endif
         auditSettings.Logger?.LogDebug("Completed reading {cntRead} xml elements.", cntRead);
         return auditSettings.SchemaStatus | contentStatus;
     }
@@ -320,12 +346,15 @@ public static partial class Audit
     private static XmlReaderSettings? GetSchemaSettings(IdsVersion vrs, ILogger? logger)
     {
         var rSettings = new XmlReaderSettings();
-        var schemas = GetSchemasByVersion(vrs, logger);
-        if (!schemas.Any())
-            return null;
-        foreach (var schema in schemas)
+        if (vrs != IdsVersion.AutoDetect)
         {
-            rSettings.Schemas.Add(schema);
+            var schemas = GetSchemasByVersion(vrs, logger);
+            if (!schemas.Any())
+                return null;
+            foreach (var schema in schemas)
+            {
+                rSettings.Schemas.Add(schema);
+            }
         }
         return rSettings;
     }
