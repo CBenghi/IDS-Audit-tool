@@ -84,11 +84,11 @@ internal static class IdsLoggerExtensions
         {
             var count = candidateStrings.Count();
             if (count == 1)
-                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` (the only acceped value is `{acceptedValue}`) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, candidateStrings.First(), schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
+                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` (the only accepted value is `{acceptedValue}`) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, candidateStrings.First(), schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
             else if (count < 6)
-                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` (acceped values are {acceptedValues}) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, string.Join(",", candidateStrings), schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
+                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` (accepted values are {acceptedValues}) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, string.Join(",", candidateStrings), schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
             else
-                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` ({acceptedValuesCount} acceped values exist) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, count, schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
+                logger?.LogError("Invalid value `{value}` in {elementType} to match `{nameOflistToMatch}` ({acceptedValuesCount} accepted values exist) in the context of {schemaContext} at line {line}, position {pos}.", value, xmlContext.type, nameOflistToMatch, count, schemaContext, xmlContext.StartLineNumber, xmlContext.StartLinePosition);
         }
         return Audit.Status.IdsContentError;
     }

@@ -10,8 +10,12 @@ namespace IdsLib
         public virtual Audit.ISchemaProvider SchemaProvider { get; set; } = new SchemaProviders.AutomaticSchemaProvider();
 
         /// <summary>
-        /// If set to true skips the audit of the semantic aspects of the IDS, 
-        /// which results in a basic test of the adherence to the xsd schema.
+        /// If set to true skips the audit of the structural aspects of the IDS.
+        /// </summary>
+        public virtual bool OmitIdsSchemaAudit { get; set; } = false;
+
+        /// <summary>
+        /// If set to true skips the audit of the semantic aspects of the IDS.
         /// </summary>
         public virtual bool OmitIdsContentAudit { get; set; } = false;
 
