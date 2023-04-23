@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Schema;
 
 namespace IdsLib.SchemaProviders
@@ -15,19 +12,19 @@ namespace IdsLib.SchemaProviders
     {
         private readonly List<string> schemaFiles;
         private Audit.Status validationStatus = Audit.Status.Ok;
-        ILogger? validationLogger;
+        readonly ILogger? validationLogger;
 
         public FileBasedSchemaProvider(IEnumerable<string> schemaFiles)
         {
             this.schemaFiles = schemaFiles.ToList();
         }
 
-        void ValidationCallback(object sender, ValidationEventArgs args)
+        void ValidationCallback(object? sender, ValidationEventArgs args)
         {
             if (args.Severity == XmlSeverityType.Warning)
-                validationLogger?.LogWarning(args.Message);            
+                validationLogger?.LogWarning("{message}", args.Message);            
             else
-                validationLogger?.LogError(args.Message);
+                validationLogger?.LogError("{message}", args.Message);
             validationStatus = Audit.Status.XsdSchemaError;
         }
 

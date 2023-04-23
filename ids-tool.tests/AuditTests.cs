@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using IdsLib;
+using IdsLib.SchemaProviders;
 using idsTool.tests.Helpers;
 using IdsTool;
 using System;
@@ -172,7 +173,7 @@ public class AuditTests : BuildingSmartRepoFiles
         var s = new SingleAuditOptions()
         {
             OmitIdsContentAudit = false,
-            IdsVersion = IdsLib.IdsSchema.IdsNodes.IdsVersion.AutoDetect // this makes it load the schema on the flight
+            SchemaProvider = new ParametricSchemaProvider()
         };
         LoggerAndAuditHelpers.AuditWithStream(stream, s, XunitOutputHelper, Audit.Status.Ok, -1);
 

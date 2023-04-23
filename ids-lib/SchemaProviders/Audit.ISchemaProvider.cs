@@ -7,8 +7,19 @@ namespace IdsLib;
 
 public static partial class Audit
 {
+    /// <summary>
+    /// An interface to allow the specification of schemas to be loaded when reading the IDS xml file.
+    /// </summary>
     public interface ISchemaProvider
     {
-        Audit.Status GetSchemas(IdsVersion vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas);
+        /// <summary>
+        /// This method should return the collection of schemas to be loaded.
+        /// </summary>
+        /// <param name="version">If available, this is the version of the schema that the application has 
+        /// determined appropriate for the IDS.</param>
+        /// <param name="logger">Logger for detailed feedback on any useful information.</param>
+        /// <param name="schemas">The schemas to be loaded for the schema validation</param>
+        /// <returns>The status of the function, if no problem encountered, return <see cref="Status.Ok"/>.</returns>
+        Audit.Status GetSchemas(IdsVersion version, ILogger? logger, out IEnumerable<XmlSchema> schemas);
     }
 }

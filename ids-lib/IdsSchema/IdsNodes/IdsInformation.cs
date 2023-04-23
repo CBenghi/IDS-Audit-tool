@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace IdsLib.IdsSchema.IdsNodes;
+﻿namespace IdsLib.IdsSchema.IdsNodes;
 
 
 /// <summary>

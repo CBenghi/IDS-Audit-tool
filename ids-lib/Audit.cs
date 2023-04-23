@@ -1,19 +1,17 @@
-﻿using System;
+﻿// #define delayedSchemaLoad
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using System.Xml;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using IdsLib.IdsSchema;
 using IdsLib.IdsSchema.IdsNodes;
 using System.Data;
 using IdsLib.SchemaProviders;
-using System.Runtime.InteropServices;
-using System.Runtime;
 
 namespace IdsLib;
 
@@ -186,7 +184,7 @@ public static partial class Audit
             SchemaProvider =
                 (options.SchemaFiles.Any())
                 ? new FileBasedSchemaProvider(options.SchemaFiles) // we load the schemas from the configuration options
-                : new AutomaticSchemaProvider(), // we determine the schema version from the file,
+                : new ParametricSchemaProvider(), // we determine the schema version from the file,
             OmitIdsContentAudit =
                 options.OmitIdsContentAudit ||
                 (!string.IsNullOrWhiteSpace(options.OmitIdsContentAuditPattern) && Regex.IsMatch(theFile.FullName, options.OmitIdsContentAuditPattern, RegexOptions.IgnoreCase))
@@ -210,32 +208,38 @@ public static partial class Audit
         return rSettings;
     }
 
+    protected class XmlXsdResolver : XmlResolver
+    {
+        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+        {
+            return new object();
+        }
+    }
+
     private static async Task<Status> AuditStreamAsync(Stream theStream, AuditHelper auditSettings, ILogger? logger)
     {
         Status contentStatus = Status.Ok;
         // the handler needs to be set before creating the reader,
         // otherwise the validation event is not registered
         var rSettings = GetXmlSettings(auditSettings.Options);
+        rSettings.XmlResolver = new XmlXsdResolver();
         if (!auditSettings.Options.OmitIdsSchemaAudit)
             rSettings.ValidationEventHandler += new ValidationEventHandler(auditSettings.ValidationReporter);
-        XmlReader reader;
-        try
-        {
-            // the creation is inside a try block because there might be problems when 
-            // using schemas from the end user
-            //
-            reader = XmlReader.Create(theStream, rSettings);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogCritical("{exceptionType}: {exceptionMessage}", ex.GetType().Name, ex.Message);
-            return auditSettings.SchemaStatus | contentStatus | Status.XsdSchemaError;
-        }
+#if !delayedSchemaLoad
+        var schemaLoadingStatus = PopulateSchema(IdsVersion.Ids0_9, auditSettings.Options.SchemaProvider, logger, rSettings.Schemas);
+        if (schemaLoadingStatus != Status.Ok)
+            return auditSettings.SchemaStatus | contentStatus | schemaLoadingStatus;
+#endif
+        var reader = XmlReader.Create(theStream, rSettings);
 
         var cntRead = 0;
         var elementsStack = new Stack<BaseContext>(); // prepare the stack to evaluate the IDS content
         BaseContext? current = null;
         var needLoadSchema = !auditSettings.Options.OmitIdsSchemaAudit;
+#if !delayedSchemaLoad
+        needLoadSchema = false;
+#endif
+        needLoadSchema = false;
         while (await reader.ReadAsync()) // the loop reads the entire file to trigger validation events.
         {
             cntRead++;
@@ -250,34 +254,23 @@ public static partial class Audit
                         if (elementsStack.Count > 0)
                             parent = elementsStack.Peek();
 #else
-                            if (elementsStack.TryPeek(out var peeked))
-                                parent = peeked;
+                        if (elementsStack.TryPeek(out var peeked))
+                            parent = peeked;
 #endif
                         if (needLoadSchema && reader.LocalName == "ids")
                         {
                             var loc = reader.GetAttribute("schemaLocation", "http://www.w3.org/2001/XMLSchema-instance") ?? string.Empty;
                             var vrs = IdsFacts.GetVersionFromLocation(loc);
-                            var ret = auditSettings.Options.SchemaProvider.GetSchemas(vrs, logger, out var schemas);
+                            if (reader.Settings is null)
+                            {
+                                logger?.LogCritical("Unexpected null value for XmlReader.Settings. Contact the author.");
+                                return Status.UnhandledError;
+                            }
+                            var ret = PopulateSchema(vrs, auditSettings.Options.SchemaProvider, logger, reader.Settings.Schemas);
                             if (ret != Status.Ok)
                                 return auditSettings.SchemaStatus | contentStatus | ret;
-                            foreach (var schema in schemas)
-                            {
-                                rSettings.Schemas.Add(schema);
-                            }
-                            try
-                            {
-                                rSettings.Schemas.Compile();
-                            }
-                            catch (Exception ex)
-                            {
-                                logger?.LogError("Schema compilation error: {message}", ex.Message);
-                                return auditSettings.SchemaStatus | contentStatus | Status.XsdSchemaError;
-                            }
-                            var names = rSettings.Schemas.GlobalElements.Names.OfType<XmlQualifiedName>().Select(x => x.Name);
-                            if (!names.Contains("http://standards.buildingsmart.org/IDS:ids"))
-                            {
-
-                            }
+                            reader.Settings.Schemas.Compile();
+                            
                             needLoadSchema = false; // prevent further loading
                         }
                         var newContext = IdsXmlHelpers.GetContextFromElement(reader, parent, logger); // this is always not null
@@ -313,6 +306,34 @@ public static partial class Audit
 
         auditSettings.Logger?.LogDebug("Completed reading {cntRead} xml elements.", cntRead);
         return auditSettings.SchemaStatus | contentStatus;
+    }
+
+    private static Status PopulateSchema(IdsVersion vrs, ISchemaProvider schemaProvider, ILogger? logger, XmlSchemaSet destSchemas)
+    {
+        var ret = schemaProvider.GetSchemas(vrs, logger, out var schemas);
+        if (ret != Status.Ok)
+            return ret;
+        foreach (var schema in schemas)
+        {
+            destSchemas.Add(schema);
+        }
+        try
+        {
+            destSchemas.Compile();
+            var names = destSchemas.GlobalElements.Names.OfType<XmlQualifiedName>().Select(x => x.ToString());
+            if (!names.Contains("http://standards.buildingsmart.org/IDS:ids"))
+            {
+                logger?.LogError("Ids definition missing in schema.");
+                return Status.XsdSchemaError;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError("Schema compilation error: {message}", ex.Message);
+            return Status.XsdSchemaError;
+        }
+        return ret;
+
     }
 
     private static Status ProcessSingleFile(FileInfo theFile, IBatchAuditOptions batchOptions, ILogger? logger)

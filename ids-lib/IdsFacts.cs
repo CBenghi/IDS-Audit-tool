@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IdsLib.IdsSchema.IdsNodes;
 
@@ -44,6 +40,5 @@ public enum IdsVersion
     /// <summary>
     /// Version 1; this is not final until formal release.
     /// </summary>
-    Ids1_0,
-    AutoDetect,
+    Ids1_0
 }

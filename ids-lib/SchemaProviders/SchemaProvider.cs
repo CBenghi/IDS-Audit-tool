@@ -8,9 +8,9 @@ using System.Xml.Schema;
 
 namespace IdsLib.SchemaProviders
 {
-    public abstract class SchemaProvider
+    internal abstract class SchemaProvider
     {
-        protected static Audit.Status GetSchemasByVersion(IdsVersion vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas)
+        protected static Audit.Status GetResourceSchemasByVersion(IdsVersion vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas)
         {
             var ret = Audit.Status.Ok;
             IEnumerable<string> tmpResources = Enumerable.Empty<string>();
