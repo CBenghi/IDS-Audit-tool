@@ -239,7 +239,6 @@ public static partial class Audit
 #if !delayedSchemaLoad
         needLoadSchema = false;
 #endif
-        needLoadSchema = false;
         while (await reader.ReadAsync()) // the loop reads the entire file to trigger validation events.
         {
             cntRead++;
@@ -269,7 +268,8 @@ public static partial class Audit
                             var ret = PopulateSchema(vrs, auditSettings.Options.SchemaProvider, logger, reader.Settings.Schemas);
                             if (ret != Status.Ok)
                                 return auditSettings.SchemaStatus | contentStatus | ret;
-                            reader.Settings.Schemas.Compile();
+                            // reader.Settings.Schemas.Compile();
+                            reader = XmlReader.Create(theStream, reader.Settings);
                             
                             needLoadSchema = false; // prevent further loading
                         }
