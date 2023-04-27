@@ -239,7 +239,6 @@ public static partial class Audit
 #if !delayedSchemaLoad
         needLoadSchema = false;
 #endif
-        needLoadSchema = false;
         while (await reader.ReadAsync()) // the loop reads the entire file to trigger validation events.
         {
             cntRead++;
