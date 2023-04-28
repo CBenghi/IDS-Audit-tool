@@ -29,8 +29,6 @@ public class IdsInformation
         }
     }
 
-    
-
     internal static IdsInformation CreateInvalid(string InvalidMessage)
     {
         return new IdsInformation

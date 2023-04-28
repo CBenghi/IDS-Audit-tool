@@ -17,7 +17,13 @@ internal static class IdsLoggerExtensions
         return Audit.Status.IdsContentError;
     }
 
-    internal static Audit.Status ReportUnexpectedScenario(this ILogger? logger, string scenarioMessage, BaseContext context)
+    internal static Audit.Status ReportUnexpectedScenario(this ILogger? logger, string scenarioMessage)
+    {
+        logger?.LogCritical("Unhandled scenario: {message}", scenarioMessage);
+        return Audit.Status.NotImplementedError;
+    }
+
+    internal static Audit.Status ReportLocatedUnexpectedScenario(this ILogger? logger, string scenarioMessage, BaseContext context)
     {
         logger?.LogCritical("Unhandled scenario: {message} on `{tp}` at line {line}, position {pos}.", scenarioMessage, context.type, context.StartLineNumber, context.StartLinePosition);
         return Audit.Status.NotImplementedError;

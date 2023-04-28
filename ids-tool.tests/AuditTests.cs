@@ -157,7 +157,7 @@ public class AuditTests : BuildingSmartRepoFiles
 #pragma warning restore SYSLIB0014 // Type or member is obsolete
         var stream = Request.GetResponse().GetResponseStream();
         stream.Should().NotBeNull();
-        LoggerAndAuditHelpers.FullAudit(stream, XunitOutputHelper, Audit.Status.Ok);
+        LoggerAndAuditHelpers.FullAudit(stream, XunitOutputHelper, Audit.Status.UnhandledError);
         Assert.Throws<System.NotSupportedException>(() => stream.Seek(0, SeekOrigin.Begin));
     }
 
@@ -173,9 +173,9 @@ public class AuditTests : BuildingSmartRepoFiles
         var s = new SingleAuditOptions()
         {
             OmitIdsContentAudit = false,
-            SchemaProvider = new ParametricSchemaProvider()
+            SchemaProvider = new SeekableStreamSchemaProvider()
         };
-        LoggerAndAuditHelpers.AuditWithStream(stream, s, XunitOutputHelper, Audit.Status.Ok, -1);
+        LoggerAndAuditHelpers.AuditWithStream(stream, s, XunitOutputHelper, Audit.Status.UnhandledError, -1);
 
         Assert.Throws<System.NotSupportedException>(() => stream.Seek(0, SeekOrigin.Begin));
     }

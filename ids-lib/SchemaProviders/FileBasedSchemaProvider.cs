@@ -14,8 +14,9 @@ namespace IdsLib.SchemaProviders
         private Audit.Status validationStatus = Audit.Status.Ok;
         readonly ILogger? validationLogger;
 
-        public FileBasedSchemaProvider(IEnumerable<string> schemaFiles)
+        public FileBasedSchemaProvider(IEnumerable<string> schemaFiles, ILogger? logger)
         {
+            validationLogger = logger;
             this.schemaFiles = schemaFiles.ToList();
         }
 
@@ -28,7 +29,7 @@ namespace IdsLib.SchemaProviders
             validationStatus = Audit.Status.XsdSchemaError;
         }
 
-        public Audit.Status GetSchemas(IdsVersion vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas)
+        public Audit.Status GetSchemas(Stream _, ILogger? logger, out IEnumerable<XmlSchema> schemas)
         {
             var ret = Audit.Status.Ok;
             var imports = new List<string>();

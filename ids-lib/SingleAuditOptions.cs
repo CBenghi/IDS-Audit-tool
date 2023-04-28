@@ -8,9 +8,9 @@ namespace IdsLib
     public class AuditProcessOptions
     {
         /// <summary>
-        /// A class that defines the specific schemas to be loaded for the schema validation.
+        /// Defines the specific schemas to be loaded for the validation.
         /// </summary>
-        public virtual Audit.ISchemaProvider SchemaProvider { get; set; } = new SchemaProviders.ParametricSchemaProvider();
+        public virtual Audit.ISchemaProvider SchemaProvider { get; set; } = new SchemaProviders.SeekableStreamSchemaProvider();
 
         /// <summary>
         /// If set to true skips the audit of the structural aspects of the IDS.

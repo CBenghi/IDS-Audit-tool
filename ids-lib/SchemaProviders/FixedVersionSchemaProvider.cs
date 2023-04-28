@@ -1,6 +1,7 @@
 ﻿using IdsLib.IdsSchema.IdsNodes;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Schema;
 
 namespace IdsLib.SchemaProviders
@@ -13,7 +14,7 @@ namespace IdsLib.SchemaProviders
             fixedVersion = vrs;
         }
 
-        public Audit.Status GetSchemas(IdsVersion vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas)
+        public Audit.Status GetSchemas(Stream vrs, ILogger? logger, out IEnumerable<XmlSchema> schemas)
         {
             return GetResourceSchemasByVersion(fixedVersion, logger, out schemas);
         }
