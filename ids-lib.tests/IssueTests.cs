@@ -2,6 +2,7 @@
 using IdsLib.IfcSchema;
 using idsTool.tests.Helpers;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -112,5 +113,76 @@ namespace idsTool.tests
 			var f = new FileInfo("IssueFiles/Issue 45 - IfcMassMeasure.ids");
 			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, IdsLib.Audit.Status.Ok);
 		}
+
+		[InlineData("IFCFLOWTERMINAL",
+			//"IFCFLOWTERMINALTYPE",
+			"IFCAIRTERMINALTYPE",
+			"IFCELECTRICAPPLIANCETYPE",
+			"IFCELECTRICHEATERTYPE",
+			"IFCFIRESUPPRESSIONTERMINALTYPE",
+			"IFCGASTERMINALTYPE",
+			"IFCLAMPTYPE",
+			"IFCLIGHTFIXTURETYPE",
+			"IFCOUTLETTYPE",
+			"IFCSANITARYTERMINALTYPE",
+			"IFCSTACKTERMINALTYPE",
+			"IFCWASTETERMINALTYPE",
+
+			"IFCDISTRIBUTIONCHAMBERELEMENTTYPE", "IFCDISTRIBUTIONELEMENTTYPE"	// From non-abstract super classes. Undesireable by a sideffect of supporting WallStandardCase
+			)]
+		[InlineData("IFCPLATE", "IFCPLATETYPE")]
+		[InlineData("IFCWALL", "IFCWALLTYPE")]
+		[InlineData("IFCWALLSTANDARDCASE", "IFCWALLTYPE")]
+		[InlineData("IFCELEMENT", 
+			"IFCDISTRIBUTIONELEMENTTYPE",
+			"IFCFURNISHINGELEMENTTYPE",
+			"IFCTRANSPORTELEMENTTYPE")]
+		[Theory]
+		public void Issue_57_RelationsAreCorrect_2x3(string ifcElement, params string[] expectedTypes)
+		{
+			var instance = SchemaInfo.SchemaIfc2x3[ifcElement];
+			instance.Should().NotBeNull();
+
+			instance.RelationTypeClasses.Should().BeEquivalentTo(expectedTypes, opts=> opts.WithoutStrictOrdering());
+		}
+
+		[InlineData("IFCFLOWTERMINAL",
+			//"IFCFLOWTERMINALTYPE",
+			"IFCFIRESUPPRESSIONTERMINALTYPE",
+			"IFCSANITARYTERMINALTYPE", 
+			"IFCSTACKTERMINALTYPE", 
+			"IFCWASTETERMINALTYPE", 
+			"IFCAIRTERMINALTYPE", 
+			"IFCMEDICALDEVICETYPE", 
+			"IFCSPACEHEATERTYPE", 
+			"IFCAUDIOVISUALAPPLIANCETYPE", 
+			"IFCCOMMUNICATIONSAPPLIANCETYPE", 
+			"IFCELECTRICAPPLIANCETYPE", 
+			"IFCLAMPTYPE", 
+			"IFCLIGHTFIXTURETYPE", 
+			"IFCOUTLETTYPE",
+
+			"IFCDISTRIBUTIONCHAMBERELEMENTTYPE", "IFCDISTRIBUTIONELEMENTTYPE"   // From non-abstract super classes. Undesireable by a sideffect of supporting WallStandardCase
+			)]
+		[InlineData("IFCPLATE", "IFCPLATETYPE")]
+		[InlineData("IFCWALL", "IFCWALLTYPE")]
+		[InlineData("IFCWALLSTANDARDCASE", "IFCWALLTYPE")]
+		[InlineData("IFCELEMENT",
+			"IFCFURNISHINGELEMENTTYPE", 
+			"IFCDISTRIBUTIONELEMENTTYPE", 
+			"IFCCIVILELEMENTTYPE", 
+			"IFCELEMENTASSEMBLYTYPE", 
+			"IFCGEOGRAPHICELEMENTTYPE", 
+			"IFCTRANSPORTELEMENTTYPE"
+			)]
+		[Theory]
+		public void Issue_57_RelationsAreCorrect_Ifc4(string ifcElement, params string[] expectedTypes)
+		{
+			var instance = SchemaInfo.SchemaIfc4[ifcElement];
+			instance.Should().NotBeNull();
+
+			instance.RelationTypeClasses.Should().BeEquivalentTo(expectedTypes, opts => opts.WithoutStrictOrdering());
+		}
+
 	}
 }
