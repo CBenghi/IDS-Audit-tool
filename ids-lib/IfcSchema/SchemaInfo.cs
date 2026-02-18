@@ -778,12 +778,12 @@ namespace IdsLib.IfcSchema
 			var allPredefinedTypes = new List<string>();
 			foreach (var schema in schemaInfos)
 			{
-				allPredefinedTypes = allPredefinedTypes.Union(schema.SelectPredefinedFor(allSchemaClasses)).ToList();
+				allPredefinedTypes = allPredefinedTypes.Union(schema.GetPredefinedTypesFor(allSchemaClasses)).ToList();
 			}
 			return allPredefinedTypes.Distinct().ToList();
 		}
 
-		private IEnumerable<string> SelectPredefinedFor(List<string> allSchemaClasses)
+		internal IEnumerable<string> GetPredefinedTypesFor(List<string> allSchemaClasses)
 		{
 			foreach (var className in allSchemaClasses)
 			{

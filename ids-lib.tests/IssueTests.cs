@@ -76,11 +76,36 @@ namespace idsTool.tests
 		}
 
 		[Fact]
+		public void Issue_43_DataType()
+		{
+			var f = new FileInfo("IssueFiles/Issue 43 - dataType.ids");
+			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, IdsLib.Audit.Status.IdsContentError, 1);
+		}
+
+		[Fact]
+		public void Issue_52_ErrorMessage()
+		{
+			// This test case is meant to check that the error message is clear enough to understand the problem and how to fix it.
+			var f = new FileInfo("IssueFiles/Issue 52 - Error 306 - not clear.ids");
+			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, IdsLib.Audit.Status.IdsStructureError);
+		}
+
+		[Fact]
 		public void Issue_46_SchemaMatch()
 		{
 			var f = new FileInfo("IssueFiles/Issue 46 - Ensure feedback.ids");
 			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, IdsLib.Audit.Status.Ok);
 		}
+
+		[Theory]
+		[InlineData("IssueFiles/Issue 53 - Userdefined.ids", IdsLib.Audit.Status.Ok)]
+		[InlineData("IssueFiles/Issue 53 - Userdefined - Fail.ids", IdsLib.Audit.Status.IdsContentError)]
+		public void GithubIssues(string filename, IdsLib.Audit.Status expectedOutcome)
+		{
+			var f = new FileInfo(filename);
+			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, expectedOutcome);
+		}
+
 
 
 		[Fact(Skip = "Test case is no longer valid because the error was not meaningful when fixing #46")]

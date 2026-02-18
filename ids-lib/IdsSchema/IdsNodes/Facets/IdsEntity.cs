@@ -74,14 +74,6 @@ internal class IdsEntity : IdsXmlNode, IIfcTypeConstraintProvider, IIdsFacet
 			ret |= rest.EachEnumMeaningfulAgainstCandidates(allSchemaClasses, false, logger, "entity name", requiredSchemaVersions);
         }
 
-
-		if (predefinedTypeMatcher is XsRestriction predRest)
-		{
-			allSchemaClasses ??= SchemaInfo.GetAllClassesFor(schemas).Select(x => x.ToUpperInvariant()).ToList();
-			var allSchemaPredefined = SchemaInfo.GetAllPredefinedTypesFor(schemas, allSchemaClasses).ToList();
-			ret |= predRest.EachEnumMeaningfulAgainstCandidates(allSchemaPredefined, false, logger, PRED_TYPE, requiredSchemaVersions);
-		}
-
 		foreach (var schema in schemas)
         {
 			// we want to make sure that at least one match exist in the name list for each schema	
@@ -106,19 +98,24 @@ internal class IdsEntity : IdsXmlNode, IIfcTypeConstraintProvider, IIdsFacet
                     continue;
                 }
                 if (possiblePredefined == null)
-                    possiblePredefined = new List<string>(c.PredefinedTypeValues);
+                    possiblePredefined = [.. c.PredefinedTypeValues];
                 else
                     possiblePredefined = possiblePredefined.Intersect(c.PredefinedTypeValues).ToList(); // using intersect because it has got to work for all classes matched
             }
 
-            if (possiblePredefined == null)
-                ret |= IdsErrorMessages.Report105InvalidDataConfiguration(logger, this, PRED_TYPE);
-            else if (possiblePredefined.Contains("USERDEFINED")) // if a user defined option is available then any value is acceptable
-                continue;
-            else
-                // todo: ensure that this notifies an error and that error cases are added for multiple enumeration values
-                ret |= predefinedTypeMatcher.MustMatchAgainstCandidates(possiblePredefined, false, logger, out var matches, PRED_TYPE, schema.Version);
-        }
+			if (possiblePredefined == null)
+				ret |= IdsErrorMessages.Report105InvalidDataConfiguration(logger, this, PRED_TYPE);
+			else if (possiblePredefined.Contains("USERDEFINED")) // if a user defined option is available then any value is acceptable
+				continue;
+			else
+			{
+				ret |= predefinedTypeMatcher.MustMatchAgainstCandidates(possiblePredefined, false, logger, out var matches, PRED_TYPE, schema.Version);
+				if (predefinedTypeMatcher is XsRestriction predRest)
+				{
+					ret |= predRest.EachEnumMeaningfulAgainstCandidates(possiblePredefined, false, logger, PRED_TYPE, requiredSchemaVersions);
+				}
+			}
+		}
         if (ret != Status.Ok)
         {
             typeFilters.Clear();
