@@ -19,28 +19,39 @@ public class IfcSchema_PartOfRelationGenerator
             {
                 try
                 {
-                    var t = metaD.ExpressType(daRelation.ToUpperInvariant());
-                    if (t is null)
-                        continue;
+					var partNames = daRelation.Split(' ');
+					string manySide = string.Empty;
+					string oneSide = string.Empty;
 
-                    var propOnPartSide = t.Properties.SingleOrDefault(x => x.Value.EnumerableType is not null).Value;
-                    Type? partType = null;
-					if (propOnPartSide is not null)
-                    {
-						partType = propOnPartSide.EnumerableType;
-                    }
-					else
-                    {
-						propOnPartSide = t.Properties.Single(x => x.Value.EnumerableType is null && x.Value.Name.StartsWith("Related")).Value;
-						partType = propOnPartSide.PropertyInfo.PropertyType;
+					foreach (var partName in partNames.Reverse())
+					{
+						var t = metaD.ExpressType(partName.ToUpperInvariant());
+						if (t is null)
+							continue;
+						
+						if (string.IsNullOrEmpty(manySide)) // if the starting point has been assigned, we can avoid its search
+						{
+							var propOnManySide = t.Properties.SingleOrDefault(x => x.Value.EnumerableType is not null).Value;
+							Type? manySideType = null;
+							if (propOnManySide is not null)
+							{
+								manySideType = propOnManySide.EnumerableType;
+							}
+							else
+							{
+								propOnManySide = t.Properties.Single(x => x.Value.EnumerableType is null && x.Value.Name.StartsWith("Related")).Value;
+								manySideType = propOnManySide.PropertyInfo.PropertyType;
+							}
+							var manySideExpressType = metaD.ExpressType(manySideType.Name.ToUpperInvariant());
+							manySide = manySideExpressType.Name.ToUpperInvariant();
+						}
+						var propOnOneSide = t.Properties.Single(x => x.Value.EnumerableType is null && x.Value.Name.StartsWith("Relating")).Value;
+						var oneSideType = propOnOneSide.PropertyInfo.PropertyType;
+						var oneSideExpressType = metaD.ExpressType(oneSideType.Name.ToUpperInvariant());
+						oneSide = oneSideExpressType.Name.ToUpperInvariant();
 					}
-					var partExpressType = metaD.ExpressType(partType.Name.ToUpperInvariant());
-
-					var propOnOwnerSide = t.Properties.Single(x => x.Value.EnumerableType is null && x.Value.Name.StartsWith("Relating")).Value;
-                    var ownerType = propOnOwnerSide.PropertyInfo.PropertyType;
-                    var ownerExpressType = metaD.ExpressType(ownerType.Name.ToUpperInvariant());
-
-					sb.AppendLine($"""                yield return new PartOfRelationInformation("{daRelation}", "{ownerExpressType.Name.ToUpperInvariant()}", "{partExpressType.Name.ToUpperInvariant()}");""");
+					// sb.AppendLine($"""                yield return new PartOfRelationInformation("{daRelation}", "{ownerExpressType.Name.ToUpperInvariant()}", "{partExpressType.Name.ToUpperInvariant()}");""");
+					sb.AppendLine($"""                yield return new PartOfRelationInformation("{daRelation}", "{oneSide.ToUpperInvariant()}", "{manySide.ToUpperInvariant()}");""");
                 }
                 catch 
                 {
@@ -65,8 +76,7 @@ public class IfcSchema_PartOfRelationGenerator
         yield return "IFCRELASSIGNSTOGROUP";
         yield return "IFCRELCONTAINEDINSPATIALSTRUCTURE";
         yield return "IFCRELNESTS";
-        yield return "IFCRELVOIDSELEMENT";
-        yield return "IFCRELFILLSELEMENT";
+        yield return "IFCRELVOIDSELEMENT IFCRELFILLSELEMENT";
     }
 
     private const string stub = """
