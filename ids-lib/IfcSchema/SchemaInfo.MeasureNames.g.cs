@@ -168,7 +168,7 @@ public partial class SchemaInfo
 		new IfcDataTypeInformation("IFCGRIDTYPEENUM", new[] { "Ifc4", "Ifc4x3" }, "xs:string"),
 		new IfcDataTypeInformation("IFCHEATEXCHANGERTYPEENUM", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, "xs:string"),
 		new IfcDataTypeInformation("IFCHEATFLUXDENSITYMEASURE", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, new IfcMeasureInformation("IFCHEATFLUXDENSITYMEASURE","Heat flux density","","","W / m2","(0, 1, -3, 0, 0, 0, 0)","IfcDerivedUnitEnum.HEATFLUXDENSITYUNIT"), "xs:double"),
-		new IfcDataTypeInformation("IFCHEATINGVALUEMEASURE", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, new IfcMeasureInformation("IFCHEATINGVALUEMEASURE","Heating","","","J / K","(2, 1, -2, 0, -1, 0, 0)","IfcDerivedUnitEnum.HEATINGVALUEUNIT"), "xs:double"),
+		new IfcDataTypeInformation("IFCHEATINGVALUEMEASURE", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, new IfcMeasureInformation("IFCHEATINGVALUEMEASURE","Heating","","","J / Kg","(2, 0, -2, 0, 0, 0, 0)","IfcDerivedUnitEnum.HEATINGVALUEUNIT"), "xs:double"),
 		new IfcDataTypeInformation("IFCHOURINDAY", new[] { "Ifc2x3" }, "xs:integer"),
 		new IfcDataTypeInformation("IFCHUMIDIFIERTYPEENUM", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, "xs:string"),
 		new IfcDataTypeInformation("IFCIDENTIFIER", new[] { "Ifc2x3", "Ifc4", "Ifc4x3" }, "xs:string"),

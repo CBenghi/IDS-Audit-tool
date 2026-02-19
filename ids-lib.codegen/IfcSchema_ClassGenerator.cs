@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text;
 using Xbim.Common.Metadata;
+using static IdsLib.codegen.IfcSchema_Ifc2x3MapperGenerator;
 
 namespace IdsLib.codegen;
 
@@ -10,30 +11,24 @@ public class IfcSchema_ClassGenerator
     /// <summary>
     /// SchemaInfo.GeneratedClass.cs
     /// </summary>
-    public static string Execute()
+    internal static string Execute(List<Ifc2x3EntityMappingInformation> maps)
     {
         var source = stub;
         foreach (var schema in Program.schemas)
         {
-            var module = SchemaHelper.GetFactory(schema);
-            // Debug.WriteLine(module.Name);
-            var metaD = ExpressMetaData.GetMetadata(module);
+			List<TypeMapper> entities = TypeMapper.GetFor(schema, maps);
+			var sb = new StringBuilder();
 
-            var sb = new StringBuilder();
-
-            // trying to find a set of classes that matches the property types
-            var HandledTypes = metaD.Types().Select(x=>x.Name.ToUpperInvariant()).ToList();
-            foreach (var className in HandledTypes)
+            foreach (var classMap in entities)
             {
-                var daType = metaD.ExpressType(className.ToUpperInvariant());
-                var t = daType.Type.GetInterfaces().Select(x => x.Name).Contains("IExpressValueType");
+                var t = classMap.IfcMapToExpressType.Type.GetInterfaces().Select(x => x.Name).Contains("IExpressValueType");
                 //if (t ) //!string.IsNullOrEmpty(daType?.UnderlyingType?.Name))
                 //{
                 //    Debug.WriteLine($"{daType.Name}: {daType.UnderlyingType.Name} - {t}");
                 //}
 
                 // Enriching schema with predefined types
-                var propPdefT = daType.Properties.Values.FirstOrDefault(x => x.Name == "PredefinedType");
+                var propPdefT = classMap.IfcMapToExpressType.Properties.Values.FirstOrDefault(x => x.Name == "PredefinedType");
                 var predType = "Enumerable.Empty<string>()";
                 if (propPdefT != null)
                 {
@@ -52,13 +47,12 @@ public class IfcSchema_ClassGenerator
                 }
 
                 // other fields
-                var abstractOrNot = daType.Type.IsAbstract ? "ClassType.Abstract" : "ClassType.Concrete";
-                var ns = daType.Type.Namespace![5..];
+                var abstractOrNot = classMap.IfcMapToExpressType.Type.IsAbstract ? "ClassType.Abstract" : "ClassType.Concrete";
+                var ns = classMap.IfcMapToExpressType.Type.Namespace![5..];
 
                 // Enriching schema with attribute names
-                var attnames = NewStringArray(daType.Properties.Values.Select(x => x.Name).ToArray());
-
-                sb.AppendLine($@"			new ClassInfo(""{daType.Name}"", ""{daType.SuperType?.Name}"", {abstractOrNot}, {predType}, ""{ns}"", {attnames}),");
+                var attnames = NewStringArray(classMap.IfcMapToExpressType.Properties.Values.Select(x => x.Name).ToArray());
+                sb.AppendLine($@"			new ClassInfo(""{classMap.IdsName}"", ""{classMap.IfcMapToExpressType.SuperType?.Name}"", {abstractOrNot}, {predType}, ""{ns}"", {attnames}),");
             }
             source = source.Replace($"<PlaceHolder{schema}>\r\n", sb.ToString());
         }

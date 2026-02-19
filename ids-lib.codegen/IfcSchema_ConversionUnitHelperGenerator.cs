@@ -107,7 +107,7 @@ internal class IfcSchema_ConversionUnitHelperGenerator
 			unitName = name.Trim();
 
 			// known type misspellings
-			if (type.ToUpperInvariant() == "ANGLE")
+			if (type.ToUpperInvariant() == "PLANE ANGLE")
 				type = "PLANEANGLE";
 
 			ifcTypeName = $"IFC{type.Trim().ToUpper()}MEASURE";

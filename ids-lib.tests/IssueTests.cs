@@ -100,13 +100,12 @@ namespace idsTool.tests
 		[Theory]
 		[InlineData("IssueFiles/Issue 53 - Userdefined.ids", IdsLib.Audit.Status.Ok)]
 		[InlineData("IssueFiles/Issue 53 - Userdefined - Fail.ids", IdsLib.Audit.Status.IdsContentError)]
+		[InlineData("IssueFiles/Issue 56 - Ifc2x3 mapping.ids", IdsLib.Audit.Status.Ok)]
 		public void GithubIssues(string filename, IdsLib.Audit.Status expectedOutcome)
 		{
 			var f = new FileInfo(filename);
 			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, expectedOutcome);
 		}
-
-
 
 		[Fact(Skip = "Test case is no longer valid because the error was not meaningful when fixing #46")]
 		public void Issue_49_ErrorLocation()

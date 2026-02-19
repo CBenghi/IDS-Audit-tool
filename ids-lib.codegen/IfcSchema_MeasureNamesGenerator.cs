@@ -31,6 +31,8 @@ internal record typeMetadata
 			.Replace("meter", "metre")
 			.Replace("kilogram", "gram")
 			;
+		if (string.IsNullOrEmpty(temp))
+			throw new Exception("Unexpected scenario");
 		List<string> units = [temp];
 		if (temp == "kelvin")
 		{

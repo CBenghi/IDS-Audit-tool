@@ -12,17 +12,17 @@ internal class Program
         }
         var GeneratedContentChanged = false;
 
-		// remove when finished
 		GeneratedContentChanged = EvaluateContentChanged(
-		IfcSchema_ConversionUnitHelperGenerator.Execute(),
-		@"ids-lib\IfcSchema\SchemaInfo.ConversionUnitsHelper.g.cs") | GeneratedContentChanged;
-		
+			IfcSchema_Ifc2x3MapperGenerator.Execute(out var maps),
+			@"ids-lib\IfcSchema\SchemaInfo.Ifc2x3Maps.g.cs") | GeneratedContentChanged;
+		IfcSchema_Ifc2x3MapperGenerator.CheckExist(maps);
+
 		GeneratedContentChanged = EvaluateContentChanged(
             IfcSchema_ObjectToTypeGenerator.Execute(),
             @"ids-lib\IfcSchema\SchemaInfo.ObjectTypes.g.cs") | GeneratedContentChanged;
 
-        GeneratedContentChanged = EvaluateContentChanged(
-            IfcSchema_ClassAndAttributeNamesGenerator.Execute(),
+		GeneratedContentChanged = EvaluateContentChanged(
+            IfcSchema_ClassAndAttributeNamesGenerator.Execute(maps),
             @"ids-lib\IfcSchema\SchemaInfo.ClassAndAttributeNames.g.cs") | GeneratedContentChanged;
 
         GeneratedContentChanged = EvaluateContentChanged(
@@ -47,11 +47,11 @@ internal class Program
             @"ids-lib\IdsSchema\XsNodes\XsTypes.g.cs") | GeneratedContentChanged;
 
         GeneratedContentChanged = EvaluateContentChanged(
-            IfcSchema_ClassGenerator.Execute(),
+            IfcSchema_ClassGenerator.Execute(maps),
             @"ids-lib\IfcSchema\SchemaInfo.Schemas.g.cs") | GeneratedContentChanged;
 
         GeneratedContentChanged = EvaluateContentChanged(
-            IfcSchema_AttributesGenerator.Execute(dataTypeDictionary),
+            IfcSchema_AttributesGenerator.Execute(dataTypeDictionary, maps),
             @"ids-lib\IfcSchema\SchemaInfo.Attributes.g.cs") | GeneratedContentChanged;
 
         GeneratedContentChanged = EvaluateContentChanged(

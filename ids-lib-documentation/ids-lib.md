@@ -37,6 +37,7 @@
 | enum [DimensionType](./IdsLib.IfcSchema/DimensionType.md) | One of the core SI units of measure |
 | class [EnumerationPropertyType](./IdsLib.IfcSchema/EnumerationPropertyType.md) | Schema metadata for enumeration properties |
 | enum [FunctionalType](./IdsLib.IfcSchema/FunctionalType.md) | the IFC classes we present can be classified with regards to their potential role in the IfcRelDefinesByType relation. |
+| class [Ifc2x3EntityMappingInformation](./IdsLib.IfcSchema/Ifc2x3EntityMappingInformation.md) | Mapping information for an entity mapping from an IFC4 class to the equivalent IFC2x3 class and type, as documented by buildingSMART in the ifc2x3-occurrence-type-mapping-table.md file. For example, the definition of an IDS applicability facet with entity `IfcFilter`, should result in the identification of all `IfcFlowTreatmentDevice` in the model that are associated with a type `IfcFilterType`. |
 | class [IfcAttributeInformation](./IdsLib.IfcSchema/IfcAttributeInformation.md) | Metadata container for attributes of entities in IfcSchema |
 | class [IfcClassInformation](./IdsLib.IfcSchema/IfcClassInformation.md) | Simplistic metadata container for entities of an IfcSchema |
 | record [IfcConversionUnitInformation](./IdsLib.IfcSchema/IfcConversionUnitInformation.md) | Provides information to assemble conversion units, as per the documentation available on buidlingSMART's website. |

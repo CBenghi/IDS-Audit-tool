@@ -1,32 +1,34 @@
 ﻿using System.Text;
 using Xbim.Common.Metadata;
+using static IdsLib.codegen.IfcSchema_Ifc2x3MapperGenerator;
 
 namespace IdsLib.codegen;
 
-public class IfcSchema_ClassAndAttributeNamesGenerator
+public partial class IfcSchema_ClassAndAttributeNamesGenerator
 {
-    internal static string Execute()
+
+    internal static string Execute(List<Ifc2x3EntityMappingInformation> maps)
     {
         var classNames = new Dictionary<string, List<string>>();
         var attNames = new Dictionary<string, List<string>>();
         foreach (var schema in Program.schemas)
         {
-            var factory = SchemaHelper.GetFactory(schema);
-            var metaD = ExpressMetaData.GetMetadata(factory);
-            foreach (var daType in metaD.Types())
+			var entities = TypeMapper.GetFor(schema, maps);
+			foreach (var entity in entities)
             {
-                // only concrete classes are valid
-                if (daType.Type.IsAbstract)
+				// only concrete classes are valid
+				if (entity.IfcMapToExpressType.Type.IsAbstract)
                     continue;
 
-                // just class names
-                if (classNames.TryGetValue(daType.Name, out var lst))
+                // prepare just class names for schema
+				var className = entity.IdsName;
+				if (classNames.TryGetValue(className, out var lst))
                     lst.Add(schema);
                 else
-                    classNames.Add(daType.Name, new List<string>() { schema });
+                    classNames.Add(className, new List<string>() { schema });
 
                 // Enriching schema with attribute names
-                var thisattnames = daType.Properties.Values.Select(x => x.Name);
+                var thisattnames = entity.IfcMapToExpressType.Properties.Values.Select(x => x.Name);
                 foreach (var attributeName in thisattnames)
                 {
                     if (attNames.TryGetValue(attributeName, out var attlst))

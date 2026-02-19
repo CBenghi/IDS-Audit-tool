@@ -29,6 +29,7 @@ public class SchemaInfo : IEnumerable<ClassInfo>
 | static [AllConcreteClasses](SchemaInfo/AllConcreteClasses.md) { get; } | The names of all concrete classes across known IFC schemas |
 | static [AllDataTypes](SchemaInfo/AllDataTypes.md) { get; } | The names of dataType classes across all schemas. |
 | static [AllMeasureInformation](SchemaInfo/AllMeasureInformation.md) { get; } | A selection of all the measures available in [`AllDataTypes`](./SchemaInfo/AllDataTypes.md). |
+| static [Ifc2x3SpecialEntityMaps](SchemaInfo/Ifc2x3SpecialEntityMaps.md) { get; } | Provides a list of IDS entity names that need to be remapped when dealing with IFC2x3 schema. See [`Ifc2x3EntityMappingInformation`](./Ifc2x3EntityMappingInformation.md) for more information on the mapping and its intended use. |
 | static [StandardConversionUnits](SchemaInfo/StandardConversionUnits.md) { get; } | Some standard unit conversions found in IFC files, including those defined in the buildingSMART documentation |
 | static [GetConcreteClassesFrom](SchemaInfo/GetConcreteClassesFrom.md)(…) | Returns a list of the concrete class names that implement a given top class. When multiple schema flags are passed the list is the non-repeating union of the values of each schema |
 | static [GetMeasureInformation](SchemaInfo/GetMeasureInformation.md)(…) | A selection of measures available in relevant schemas[`AllDataTypes`](./SchemaInfo/AllDataTypes.md). |

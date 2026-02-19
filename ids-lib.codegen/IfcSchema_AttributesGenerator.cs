@@ -2,7 +2,9 @@
 using System.Text;
 using Xbim.Common.Metadata;
 using Xbim.IO.Esent;
+using Xbim.IO.Xml.BsConf;
 using Xbim.Properties;
+using static IdsLib.codegen.IfcSchema_Ifc2x3MapperGenerator;
 
 namespace IdsLib.codegen;
 
@@ -90,21 +92,23 @@ class IfcSchema_AttributesGenerator
     /// <summary>
     /// SchemaInfo.GeneratedAttributes.cs
     /// </summary>
-    static public string Execute(Dictionary<string, typeMetadata> dataTypeDictionary)
+    static public string Execute(Dictionary<string, typeMetadata> dataTypeDictionary, List<Ifc2x3EntityMappingInformation> maps)
     {
         var source = stub;
         foreach (var schemaString in Program.schemas)
 		{
+			// needed for attributes
 			var factory = SchemaHelper.GetFactory(schemaString);
 			var metaD = ExpressMetaData.GetMetadata(factory);
 
+			var entities = TypeMapper.GetFor(schemaString, maps);
 			// create a dictionary that defines the attributes 
-			var attributes = GetAttributes(metaD);
+			var attributes = GetAttributes(entities);
 			foreach (var item in attributes.Values)
 			{
 				item.TrySetXmlBase(dataTypeDictionary);
 			}
-			var sb = BuildCode(metaD, attributes);
+			var sb = BuildCode(metaD, attributes, maps);
 			source = source.Replace($"<PlaceHolder{schemaString}>\r\n", sb.ToString());
 		}
 
@@ -114,7 +118,9 @@ class IfcSchema_AttributesGenerator
 
     }
 
-	private static StringBuilder BuildCode(ExpressMetaData metaD, Dictionary<string, IfcAttribute> owningTypesByAttribute)
+	
+
+	private static StringBuilder BuildCode(ExpressMetaData metaD, Dictionary<string, IfcAttribute> owningTypesByAttribute, List<Ifc2x3EntityMappingInformation> maps)
 	{
 		var sb = new StringBuilder();
 
@@ -130,6 +136,16 @@ class IfcSchema_AttributesGenerator
 			{
 				var thisClassName = onlyTopClasses[i];
 				var thisClass = metaD.ExpressType(thisClassName);
+				// this is a hack, if we have no value for thisClass it's because there is a mapping for it in the case of Ifc2x3,
+				// so we need to get the name of the mapped class and get the metadata for it
+				if (thisClass is null)
+				{
+					var mapname = maps.FirstOrDefault(x => x.IdsEntity.ToUpperInvariant() == thisClassName.ToUpperInvariant())?.IfcEntity;
+					if (mapname is null)
+						throw new Exception($"Could not find mapping for {thisClassName} in schema.");
+					thisClass = metaD.ExpressType(mapname.ToUpperInvariant());
+				}
+
 
 				foreach (var sub in thisClass.AllSubTypes)
 				{
@@ -158,30 +174,31 @@ class IfcSchema_AttributesGenerator
 		return sb;
 	}
 
-	private static Dictionary<string, IfcAttribute> GetAttributes(ExpressMetaData metaD)
+	private static Dictionary<string, IfcAttribute> GetAttributes(List<TypeMapper> entities)
 	{
 		Dictionary<string, IfcAttribute> owningTypesByAttribute = new();
 
-		foreach (var daType in metaD.Types())
+		foreach (var map in entities)
 		{
+			var daType = map.IfcMapToExpressType;
 			foreach (var prop in daType.Properties.Values)
 			{
 				// we should skip derived and inverse
 				if (prop.IsInverse || prop.IsDerived)
 					continue; // no match
-				var tp = Analyse(prop, metaD);
+				var tp = Analyse(prop);
 				//if (string.IsNullOrEmpty(tp))
 				//	continue; // no value type
 				
 				// owning type
 				if (owningTypesByAttribute.TryGetValue(prop.Name, out var lst))
 				{
-					lst.AddClass(daType.Name.ToUpperInvariant());
+					lst.AddClass(map.IdsName.ToUpperInvariant());
 					lst.AddBase(tp);
 				}
 				else
 				{
-					owningTypesByAttribute.Add(prop.Name, new IfcAttribute(prop.Name, daType.Name, tp));
+					owningTypesByAttribute.Add(prop.Name, new IfcAttribute(prop.Name, map.IdsName, tp));
 				}
 			}
 		}
@@ -189,7 +206,7 @@ class IfcSchema_AttributesGenerator
 		return owningTypesByAttribute;
 	}
 
-	private static string Analyse(ExpressMetaProperty prop, ExpressMetaData metaD)
+	private static string Analyse(ExpressMetaProperty prop)
 	{
         var tp = prop.PropertyInfo.PropertyType;
 
