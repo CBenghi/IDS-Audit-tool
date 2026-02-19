@@ -36,10 +36,6 @@ namespace idsTool.tests
                             continue;
                         if (type.Count() > 1)
                             continue;
-						if (string.IsNullOrWhiteSpace(type.First()))
-						{
-							output.WriteLine($"no type for {pset.Name}.{prop.Name} in {schema.Version}");
-						}
 
 						var fullPropName = $"{pset.Name}.{prop.Name}";
                         if (propToMeasure.TryGetValue(fullPropName, out var measures))
@@ -49,40 +45,19 @@ namespace idsTool.tests
                     }
                 }
             }
-
-			List<string> acknowledgedDifferences =
-				[
-				"IFCAREAMEASURE, IFCCOUNTMEASURE",
-				"IFCCOUNTMEASURE, IFCINTEGER",
-				"IFCCOUNTMEASURE, IFCVOLUMEMEASURE",
-				"IFCDURATION, IFCTIMEMEASURE",
-				"IFCELECTRICCURRENTMEASURE, IFCPOWERMEASURE",
-				"IFCLABEL, IFCPRESSUREMEASURE",
-				"IFCLABEL, IFCTEXT",
-				"IFCLENGTHMEASURE, IFCPOSITIVELENGTHMEASURE",
-				"IFCNONNEGATIVELENGTHMEASURE, IFCPOSITIVELENGTHMEASURE",
-				"IFCNORMALISEDRATIOMEASURE, IFCPOSITIVERATIOMEASURE",
-				"IFCNORMALISEDRATIOMEASURE, IFCREAL",
-				"IFCPOSITIVERATIOMEASURE, IFCREAL",
-				"IFCPRESSUREMEASURE, IFCTIMESERIES",
-				];
-
             var unexpectedMeasureTypes = 0;
             foreach (var item in propToMeasure)
             {
                 var val = item.Value;
-                var dist = val.Distinct().OrderBy(x=>x).ToArray();
+                var dist = val.Distinct().ToArray();
 
                 if (dist.Length > 1)
                 {
-					var orderedJoin = string.Join(", ", dist);
-					if (acknowledgedDifferences.Contains(orderedJoin))
-						continue;
-					output.WriteLine($"{dist.Length} measure values for {item.Key}: '{orderedJoin}'");
+                    output.WriteLine($"{dist.Length} measure values for {item.Key}: {string.Join(", ", dist)}");
                     unexpectedMeasureTypes++;
                 }   
             }
-            unexpectedMeasureTypes.Should().Be(0, "there should be no un-acknowledged variations");
+            unexpectedMeasureTypes.Should().Be(80, "these are the acknowledged variations");
         }
 
         /// <summary>
@@ -121,7 +96,7 @@ namespace idsTool.tests
                     unexpectedMeasureTypes++;
                 }
             }
-            var expectedCount = 641;
+            var expectedCount = 619;
             unexpectedMeasureTypes.Should().Be(expectedCount, $"{expectedCount} is the count of acknowledged variations");
         }
     }

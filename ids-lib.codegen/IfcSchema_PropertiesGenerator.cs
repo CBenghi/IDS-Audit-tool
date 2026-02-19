@@ -26,16 +26,20 @@ public class IfcSchema_PropertiesGenerator
     {
         var source = stub;
 		// FileInfo f = new FileInfo("buildingSMART\\Pset_IFC4X3.ifc");
-		FileInfo fxml = new FileInfo("buildingSMART\\annex-a-psd.zip");
+		FileInfo fxmlProp4x3 = new FileInfo("buildingSMART\\annex-a-psd.zip");
+		FileInfo fxmlProp4add2tc1 = new FileInfo("buildingSMART\\Psets-ifc4-add2-tc1.zip");
         var schemas = new[] { Xbim.Properties.Version.IFC2x3, Xbim.Properties.Version.IFC4, Xbim.Properties.Version.IFC4x3 };
         foreach (var schema in schemas)
         {
             var sb = new StringBuilder();
-            var propsets = GetPsets(schema).OrderBy(x => x.Name).ToArray();
-			//if (schema == Xbim.Properties.Version.IFC4x3)
-			//	propsets = GetPsets(f).OrderBy(x => x.Name).ToArray();
+			propSetTempInfo[]? propsets = null;
 			if (schema == Xbim.Properties.Version.IFC4x3)
-				propsets = GetZipPsets(fxml).OrderBy(x => x.Name).ToArray();
+				propsets = GetZipPsets(fxmlProp4x3).OrderBy(x => x.Name).ToArray();
+			else if (schema == Xbim.Properties.Version.IFC4)
+				propsets = GetZipPsets(fxmlProp4add2tc1).OrderBy(x => x.Name).ToArray();
+			else
+				propsets = GetPsets(schema).OrderBy(x => x.Name).ToArray();
+			
 			foreach (var item in propsets)
 			{
 				if (item.ApplicableClasses is null)
@@ -152,6 +156,10 @@ public class IfcSchema_PropertiesGenerator
 		if (tenum is not null)
 		{
 			var enumVals = GetChildValues(tenum, "EnumList", "EnumItem");
+			if (!enumVals.Any())
+			{
+				enumVals = GetChildValues(tenum, "ConstantList", "ConstantDef", "Name");
+			}
 			return $"""new EnumerationPropertyType("{nm}", {NewStringArray(enumVals.Select(x => x.ToString() ?? ""))} ){def}""";
 		}
 
@@ -170,6 +178,11 @@ public class IfcSchema_PropertiesGenerator
 			var def2Val = GetChildNodes(tTable, "DefinedValue", "DataType").First().GetAttribute("type");
 			return $"""new TableValuePropertyType("{nm}", "{def1Val}", "{def2Val}"){def}""";
 		}
+		var vComplex = t.ChildNodes.OfType<XmlElement>().FirstOrDefault(x => x.Name == "TypeComplexProperty");
+		if (vComplex is not null)
+		{
+			return "";
+		}
 
 		throw new NotImplementedException($"Unknown type {t.Name} for {nm}");
 
@@ -187,7 +200,7 @@ public class IfcSchema_PropertiesGenerator
 		}
 	}
 
-	private static IEnumerable<string> GetChildValues(XmlElement root, string firstSub, string element)
+	private static IEnumerable<string> GetChildValues(XmlElement root, string firstSub, string element, string? final = null)
 	{
 		var t = root.ChildNodes.OfType<XmlElement>().FirstOrDefault(x => x.Name == firstSub);
 		if (t is null)
@@ -195,9 +208,14 @@ public class IfcSchema_PropertiesGenerator
 		var t2 = t.ChildNodes.OfType<XmlElement>().Where(x => x.Name == element);
 		foreach (var item in t2)
 		{
-			var name = item.InnerText;
+			var finalItem = item;
+			if (final is not null)
+			{
+				finalItem = item.ChildNodes.OfType<XmlElement>().FirstOrDefault(x => x.Name == final);
+			}
+			var name = finalItem?.InnerText;
 			if (!string.IsNullOrWhiteSpace(name))
-				yield return name;
+				yield return name;			
 		}
 	}
 

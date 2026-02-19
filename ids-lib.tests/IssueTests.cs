@@ -97,7 +97,7 @@ namespace idsTool.tests
 			LoggerAndAuditHelpers.FullAudit(f, XunitOutputHelper, IdsLib.Audit.Status.Ok);
 		}
 
-		[Theory]
+		[Theory(DisplayName = "GitHub issues")]
 		[InlineData("IssueFiles/Issue 53 - Userdefined.ids", IdsLib.Audit.Status.Ok)]
 		[InlineData("IssueFiles/Issue 53 - Userdefined - Fail.ids", IdsLib.Audit.Status.IdsContentError)]
 		[InlineData("IssueFiles/Issue 53 - IfcDistributionBoards Feeder is ok.ids", IdsLib.Audit.Status.Ok)]
@@ -105,6 +105,10 @@ namespace idsTool.tests
 		[InlineData("IssueFiles/Issue 55 - RelationConstraintFail.ids", IdsLib.Audit.Status.IdsStructureError | IdsLib.Audit.Status.IdsContentError)]
 		[InlineData("IssueFiles/Issue 55 - RelationConstraintOk.ids", IdsLib.Audit.Status.Ok)]
 		[InlineData("IssueFiles/Issue 56 - Ifc2x3 mapping.ids", IdsLib.Audit.Status.Ok)]
+		[InlineData("IssueFiles/Issue 61/IDS - TEST for Architectural Requriements.ids", IdsLib.Audit.Status.Ok)]
+		[InlineData("IssueFiles/Issue 61/IDS - TEST for Electrical Requirements.ids", IdsLib.Audit.Status.Ok)]
+		[InlineData("IssueFiles/Issue 61/IDS - TEST for Mechanical Requirements.ids", IdsLib.Audit.Status.Ok)]
+		[InlineData("IssueFiles/Issue 61/IDS - TEST for Structural Requirements.ids", IdsLib.Audit.Status.Ok)]
 		public void GithubIssues(string filename, IdsLib.Audit.Status expectedOutcome)
 		{
 			var f = new FileInfo(filename);
