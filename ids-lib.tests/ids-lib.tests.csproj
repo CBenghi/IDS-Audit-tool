@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<IsPackable>false</IsPackable>
 		<IsPublishable>false</IsPublishable>
-		<TargetFrameworks>net472</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<RootNamespace>idsTool.tests</RootNamespace>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>

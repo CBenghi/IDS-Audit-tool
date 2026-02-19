@@ -83,7 +83,7 @@ public class AuditTests : BuildingSmartRepoFiles
         var c = new BatchAuditOptions()
         {
             InputSource = f.FullName,
-            OmitIdsContentAuditPattern = @"\\invalid-",
+            OmitIdsContentAuditPattern = @"[\\/]invalid-",
             SchemaFiles = new[] { "bsFiles/ids.xsd" }
         };
         var auditResult = LoggerAndAuditHelpers.AuditWithoutExpectations(c, XunitOutputHelper);
