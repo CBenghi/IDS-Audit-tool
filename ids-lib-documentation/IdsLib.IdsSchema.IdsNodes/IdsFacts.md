@@ -12,6 +12,8 @@ public class IdsFacts
 | --- | --- |
 | [IdsFacts](IdsFacts/IdsFacts.md)() | The default constructor. |
 | const [DefaultIdsVersion](IdsFacts/DefaultIdsVersion.md) | The version of IDS schema to be assumed when running programmatically |
+| static [GetValidBaseTypes](IdsFacts/GetValidBaseTypes.md)(…) | Provides the list of valid XML base types for the `base` attribute of `xs:restriction` for a given IDS version. |
+| static [GetValidRestrictions](IdsFacts/GetValidRestrictions.md)(…) | Provides the list of valid restriction nodes for a base type for a given IDS version. |
 
 ## See Also
 

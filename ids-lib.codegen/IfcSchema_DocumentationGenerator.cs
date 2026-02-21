@@ -20,25 +20,27 @@ namespace IdsLib.codegen
 	}
 
 	internal class IfcSchema_DocumentationGenerator
-	{
-		internal static string Execute(Dictionary<string, typeMetadata> dataTypeDictionary)
+	{ 
+		internal static string Execute(Dictionary<string, typeMetadata> dataTypeDictionary, Dictionary<string, string[]> restrictionNodes)
 		{
 			var schemas = new string[] { "Ifc2x3", "Ifc4", "Ifc4x3" };
 
 			var sbDataTypes = new StringBuilder();
 			foreach (var dataType in dataTypeDictionary.Values.OrderBy(x=>x.Name))
 			{
-				var checks = schemas.Select(x => dataType.Schemas.Contains(x) ? "✔️     " : "❌     ");
+				var checks = schemas.Select(x => dataType.Schemas.Contains(x) ? "   ✓   " : "   ✗   ");
 				sbDataTypes.AppendLine($"| {dataType.Name,-45} | {string.Join(" | ", checks),-24} | {dataType.XmlBackingType,-21} |");
 			}
-
 
 			var sbXmlTypes = new StringBuilder();
 			var xmlTypes = dataTypeDictionary.Values.Select(x => x.XmlBackingType).Where(str => !string.IsNullOrWhiteSpace(str)).Distinct();
 			foreach (var dataType in xmlTypes.OrderBy(x => x))
 			{
 				var t =  "<code>" + XmlSchema_XsTypesGenerator.GetRegexString(dataType).FixMarkup() + "</code>";
-				sbXmlTypes.AppendLine($"| {dataType,-11} | {t,-133} |");
+				var dt = dataType.Replace(":", "");
+				var nodes = restrictionNodes.TryGetValue(dt, out var n) ? n : Array.Empty<string>();
+
+				sbXmlTypes.AppendLine($"| {dataType,-11} | {t,-133} | {string.Join(", ", nodes),-100 } |");
 			}
 
 			var source = stub;
@@ -57,16 +59,18 @@ namespace IdsLib.codegen
 
 			Columns of the table determine the validity of the type depending on the schema version and the required `xs:base` type for any `xs:restriction` constraint.
 
-			| dataType                                      | Ifc2x3 | Ifc4   | Ifc4x3 | Restriction base type |
-			| --------------------------------------------- | ------ | ------ | ------ | --------------------- |
+			| dataType                                      | Ifc2x3  | Ifc4    | Ifc4x3  | Restriction base type |
+			| --------------------------------------------- | :-----: | :-----: | :-----: | --------------------- |
 			<PlaceHolderDataTypes>
+
+			Please note that [IFCSTRIPPEDOPTIONAL](https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/lexical/IfcStrippedOptional.htm) is a special data type that should never be isntantiated, but it is listed here for schema tolerance reasons.
 
 			## XML base types
 
 			The list of valid XML base types for the `base` attribute of `xs:restriction`, and the associated regex expression to check for the validity of string representation is as follows:
 
-			| Base type   | string regex constraint                                                                                                               |
-			| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+			| Base type   | Value string regex constraint                                                                                                               | Valid restriction nodes                                                                              |
+			| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 			<PlaceHolderXmlTypes>
 
 			For example:
@@ -76,7 +80,7 @@ namespace IdsLib.codegen
 
 			## Notes
 
-			Please note, this document has been automatically generated via the IDS Audit Tool repository, any changes should be initiated there.
+			Please note, this document has been automatically generated via the [IDS Audit Tool repository](https://github.com/buildingSMART/IDS-Audit-tool), any changes should be initiated there.
 
 			""";
 	}

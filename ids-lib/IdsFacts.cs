@@ -1,6 +1,10 @@
-﻿using System;
+﻿using IdsLib.IdsSchema.XsNodes;
 using IdsLib.Messages;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace IdsLib.IdsSchema.IdsNodes;
 
@@ -28,8 +32,33 @@ public class IdsFacts
 	/// The version of IDS schema to be assumed when running programmatically
 	/// </summary>
 	public const IdsVersion DefaultIdsVersion = IdsVersion.Ids1_0;
-}
 
+	/// <summary>
+	/// Provides the list of valid XML base types for the `base` attribute of `xs:restriction` for a given IDS version.
+	/// </summary>
+	/// <param name="version">the required version</param>
+	/// <returns>a string including the "xs:" prefix</returns>
+	public static IEnumerable<string> GetValidBaseTypes(IdsVersion version)
+	{
+		if (version != IdsVersion.Ids1_0)
+			return Array.Empty<string>();
+		return XsRestriction.GetXsBaseTypes().Select(x => XsTypes.GetStringFromEnum(x));
+	}
+
+	/// <summary>
+	/// Provides the list of valid restriction nodes for a base type for a given IDS version.
+	/// </summary>
+	/// <param name="xsType">String representation of the type (needs to start with "xs:")</param>
+	/// <param name="version">the required version</param>
+	/// <returns>a string including the "xs:" prefix</returns>
+	public static IEnumerable<string> GetValidRestrictions(string xsType, IdsVersion version)
+	{
+		if (version != IdsVersion.Ids1_0)
+			return Array.Empty<string>();
+		var t = XsTypes.GetBaseFrom(xsType);
+		return XsRestriction.GetXsRestrictionNodes(t);
+	}
+}
 
 /// <summary>
 /// Enumeration to identify a single IDS version.

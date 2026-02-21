@@ -29,9 +29,13 @@ internal class Program
             IfcSchema_DatatypeNamesGenerator.Execute(out var dataTypeDictionary),
             @"ids-lib\IfcSchema\SchemaInfo.MeasureNames.g.cs") | GeneratedContentChanged;
 
-        // creates the datatypes md and compares it with the existing version
-        GeneratedContentChanged = EvaluateContentChanged(
-            IfcSchema_DocumentationGenerator.Execute(dataTypeDictionary),
+		GeneratedContentChanged = EvaluateContentChanged(
+			IdsSchema_RestrictionTypeGenerator.Execute(out var restrictionNodes),
+			@"ids-lib\IdsSchema\XsNodes\XsRestriction.g.cs") | GeneratedContentChanged;
+
+		// creates the datatypes md and compares it with the existing version
+		GeneratedContentChanged = EvaluateContentChanged(
+            IfcSchema_DocumentationGenerator.Execute(dataTypeDictionary, restrictionNodes),
             @"ids-lib.codegen\buildingSMART\DataTypes.md") | GeneratedContentChanged;
 
 		GeneratedContentChanged = EvaluateContentChanged(
@@ -76,17 +80,17 @@ internal class Program
         IdsLib_DocumentationUpdater.Execute();
     }
 
-    private static bool EvaluateContentChanged(string? content, string solutionDestinationPath)
+    private static bool EvaluateContentChanged(string? content, string solutionRelativePath)
     {
 		if (string.IsNullOrWhiteSpace(content))
 		{
-			Message($"Warning: {solutionDestinationPath} skipped because empty.", ConsoleColor.Yellow);
+			Message($"Warning: {solutionRelativePath} skipped because empty.", ConsoleColor.Yellow);
 			return false;
 		}
-		Console.Write($"Evaluating: {solutionDestinationPath}... ");
-        var destinationPathFolder = new DirectoryInfo(@"..\..\..\..\");
-        var destinationFullName = Path.Combine(destinationPathFolder.FullName, solutionDestinationPath);
-
+		Console.Write($"Evaluating: {solutionRelativePath}... ");
+        var solutionPathFolder = new DirectoryInfo(@"..\..\..\..\");
+		string solutionPathAsString = solutionPathFolder.FullName.ToString();
+		var destinationFullName = Path.Combine(solutionPathAsString, solutionRelativePath);
         if (File.Exists(destinationFullName))
         {
             var current = File.ReadAllText(destinationFullName);

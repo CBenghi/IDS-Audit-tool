@@ -11,6 +11,7 @@ public static class XsTypes
 | name | description |
 | --- | --- |
 | static [GetBaseFrom](XsTypes/GetBaseFrom.md)(…) | Utility function to evaluate the type enumeration from a string |
+| static [GetStringFromEnum](XsTypes/GetStringFromEnum.md)(…) | Utility function to evaluate the string representation from the enum |
 | static [IsValid](XsTypes/IsValid.md)(…) | Determines if a string value is compatible with a given type |
 | enum [BaseTypes](XsTypes.BaseTypes.md) |  |
 

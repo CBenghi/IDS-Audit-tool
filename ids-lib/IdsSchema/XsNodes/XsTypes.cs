@@ -105,6 +105,29 @@ namespace IdsLib.IdsSchema.XsNodes
 		}
 
 		/// <summary>
+		/// Utility function to evaluate the string representation from the enum
+		/// </summary>
+		/// <param name="baseType">the base value to represent</param>
+		/// <returns>the representation string prefixed with "xs:".</returns>
+		public static string GetStringFromEnum(BaseTypes baseType)
+		{
+			return baseType switch
+			{
+				BaseTypes.XsString => "xs:string",
+				BaseTypes.XsBoolean => "xs:boolean",
+				BaseTypes.XsInteger => "xs:integer",
+				BaseTypes.XsDouble => "xs:double",
+				BaseTypes.XsFloat => "xs:float",
+				BaseTypes.XsDecimal => "xs:decimal",
+				BaseTypes.XsDuration => "xs:duration",
+				BaseTypes.XsDateTime => "xs:dateTime",
+				BaseTypes.XsDate => "xs:date",
+				BaseTypes.XsAnyUri => "xs:anyUri",
+				_ => ""
+			};
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public enum BaseTypes

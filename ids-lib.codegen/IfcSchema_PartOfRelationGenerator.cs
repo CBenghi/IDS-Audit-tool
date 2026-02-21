@@ -22,7 +22,6 @@ public class IfcSchema_PartOfRelationGenerator
 					var partNames = daRelation.Split(' ');
 					string manySide = string.Empty;
 					string oneSide = string.Empty;
-
 					foreach (var partName in partNames.Reverse())
 					{
 						var t = metaD.ExpressType(partName.ToUpperInvariant());

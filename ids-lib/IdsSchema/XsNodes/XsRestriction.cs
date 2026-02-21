@@ -14,7 +14,7 @@ using static IdsLib.Audit;
 
 namespace IdsLib.IdsSchema.XsNodes;
 
-internal class XsRestriction : IdsXmlNode, IStringListMatcher, IStringPrefixMatcher, IFiniteStringMatcher
+internal partial class XsRestriction : IdsXmlNode, IStringListMatcher, IStringPrefixMatcher, IFiniteStringMatcher
 {
     internal string BaseAsString { get; init; }
     internal XsTypes.BaseTypes Base { get; init; }
@@ -137,22 +137,17 @@ internal class XsRestriction : IdsXmlNode, IStringListMatcher, IStringPrefixMatc
         return matches.Any();
     }
 
-	// taken from: https://www.w3.org/TR/xmlschema-2/
-	private Dictionary<XsTypes.BaseTypes, List<string>> validConstraintsDictionary = new Dictionary<XsTypes.BaseTypes, List<string>>()
-    { 
-        {XsTypes.BaseTypes.XsString, ["annotation", "pattern", "enumeration", "whiteSpace", "minLength", "maxLength", "length"] },
-        {XsTypes.BaseTypes.XsDouble, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsFloat, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsDuration, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsDateTime, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsTime, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsDate, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsDecimal, ["annotation", "totalDigits", "fractionDigits", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-        {XsTypes.BaseTypes.XsBoolean, ["annotation", "pattern", "whiteSpace"] },
-        {XsTypes.BaseTypes.XsInteger, ["annotation", "totalDigits", "fractionDigits", "pattern", "whiteSpace", "enumeration", "maxInclusive", "maxExclusive", "minInclusive", "minExclusive"] },
-	};
+	
 
-    protected internal override Audit.Status PerformAudit(AuditStateInformation stateInfo, ILogger? logger)
+	internal static IEnumerable<XsTypes.BaseTypes> GetXsBaseTypes() => validConstraintsDictionary.Keys;
+	internal static IEnumerable<string> GetXsRestrictionNodes(XsTypes.BaseTypes type)
+	{
+		if (validConstraintsDictionary.TryGetValue(type, out var t))
+			return t;
+		return Enumerable.Empty<string>();
+	}
+
+	protected internal override Audit.Status PerformAudit(AuditStateInformation stateInfo, ILogger? logger)
     {
 		var ret = Audit.Status.Ok;
         if (!Children.Any())
