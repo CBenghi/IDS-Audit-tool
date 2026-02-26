@@ -12,15 +12,15 @@ internal partial class XsRestriction
 {
 	private static Dictionary<XsTypes.BaseTypes, List<string>> validConstraintsDictionary = new Dictionary<XsTypes.BaseTypes, List<string>>()
 	{
-		{XsTypes.BaseTypes.XsString, ["annotation", "pattern", "enumeration", "whiteSpace", "minLength", "maxLength", "length"] },
-		{XsTypes.BaseTypes.XsDouble, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsFloat, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsDuration, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsDateTime, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsTime, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsDate, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsDecimal, ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{XsTypes.BaseTypes.XsBoolean, ["annotation", "pattern", "whiteSpace"] },
-		{XsTypes.BaseTypes.XsInteger, ["annotation", "pattern", "whiteSpace", "enumeration", "maxInclusive", "maxExclusive", "minInclusive", "minExclusive"] },
+		{XsTypes.BaseTypes.XsString, ["annotation", "pattern", "enumeration", "minLength", "maxLength", "length"] },
+		{XsTypes.BaseTypes.XsDouble, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsFloat, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsDuration, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsDateTime, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsTime, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsDate, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsDecimal, ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{XsTypes.BaseTypes.XsBoolean, ["annotation", "pattern"] },
+		{XsTypes.BaseTypes.XsInteger, ["annotation", "pattern", "enumeration", "maxInclusive", "maxExclusive", "minInclusive", "minExclusive"] },
 	};
 }

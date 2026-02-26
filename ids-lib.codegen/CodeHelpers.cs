@@ -6,4 +6,7 @@ internal class CodeHelpers
     {
         return @$"new[] {{ ""{string.Join("\", \"", classes)}"" }}";
     }
+
+	internal static string TrueCheckString = "✓";
+	internal static string FalseCheckString = " ";//"✗";
 }

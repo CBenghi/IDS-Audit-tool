@@ -9,16 +9,16 @@ internal class IdsSchema_RestrictionTypeGenerator
 	// "totalDigits" and "fractionDigits" removed from integer and decimal
 	private static Dictionary<string, string[]> validConstraintsDictionary = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
 	{
-		{"XsString", ["annotation", "pattern", "enumeration", "whiteSpace", "minLength", "maxLength", "length"] },
-		{"XsDouble", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsFloat", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsDuration", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsDateTime", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsTime", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsDate", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsDecimal", ["annotation", "pattern", "enumeration", "whiteSpace", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
-		{"XsBoolean", ["annotation", "pattern", "whiteSpace"] },
-		{"XsInteger", ["annotation", "pattern", "whiteSpace", "enumeration", "maxInclusive", "maxExclusive", "minInclusive", "minExclusive"] },
+		{"XsString", ["annotation", "pattern", "enumeration", "minLength", "maxLength", "length"] },
+		{"XsDouble", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsFloat", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsDuration", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsDateTime", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsTime", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsDate", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsDecimal", ["annotation", "pattern", "enumeration", "minExclusive", "maxExclusive", "minInclusive", "maxInclusive"] },
+		{"XsBoolean", ["annotation", "pattern"] },
+		{"XsInteger", ["annotation", "pattern", "enumeration", "maxInclusive", "maxExclusive", "minInclusive", "minExclusive"] },
 	};
 
 	internal static string Execute(out Dictionary<string, string[]> dataTypeDictionary)
